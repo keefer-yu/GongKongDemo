@@ -1,0 +1,15 @@
+bin/
+obj/
+.vs/
+*.user
+*.suo
+data/
+references/
+.superpowers/
+.dsh-project-memory/
+TestResults/
+*.db
+*.db-shm
+*.db-wal
+*.jsonl
+*.log

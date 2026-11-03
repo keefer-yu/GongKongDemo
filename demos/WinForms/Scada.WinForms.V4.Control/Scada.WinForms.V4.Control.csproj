@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Scada.UI.WinForms\Scada.UI.WinForms.csproj" />
+    <ProjectReference Include="..\..\..\src\Scada.Core\Scada.Core.csproj" />
+    <ProjectReference Include="..\..\..\src\Scada.Protocol\Scada.Protocol.csproj" />
+    <ProjectReference Include="..\..\..\src\Scada.Alarms\Scada.Alarms.csproj" />
+    <ProjectReference Include="..\..\..\src\Scada.Storage\Scada.Storage.csproj" />
+    <ProjectReference Include="..\..\..\src\Scada.Control\Scada.Control.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>

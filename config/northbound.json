@@ -1,0 +1,19 @@
+{
+  "rest": {
+    "enabled": true,
+    "url": "http://127.0.0.1:15080",
+    "apiKey": "scada-demo-token"
+  },
+  "mqtt": {
+    "enabled": true,
+    "host": "127.0.0.1",
+    "port": 18830,
+    "topicPrefix": "gongkong/line1/reactor",
+    "clientId": "scada-reactor-1",
+    "publishIntervalMs": 1000
+  },
+  "offlineBuffer": {
+    "path": "data/mqtt-outbox.jsonl",
+    "maxItems": 10000
+  }
+}

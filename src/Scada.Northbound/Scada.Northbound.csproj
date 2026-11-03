@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Scada.Core\Scada.Core.csproj" />
+    <ProjectReference Include="..\Scada.Control\Scada.Control.csproj" />
+    <ProjectReference Include="..\Scada.Storage\Scada.Storage.csproj" />
+    <PackageReference Include="MQTTnet" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,312 @@
+<Window x:Class="Scada.Wpf.V4.Control.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="clr-namespace:Scada.UI.Wpf.Controls;assembly=Scada.UI.Wpf"
+        Title="V4 安全控制 · 联锁 / 回读 / 审计 / 急停"
+        Width="1360" Height="900" MinWidth="1160" MinHeight="780"
+        WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="78" />
+            <RowDefinition Height="230" />
+            <RowDefinition Height="40" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="{StaticResource PanelBrush}" Padding="18,8">
+            <Grid>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="V4 · 安全控制（联锁 / 回读 / 审计）" FontSize="22" FontWeight="Bold" />
+                    <TextBlock Text="写设备之前先过联锁；写完之后回读比对；每一次成功/失败都进审计。控制页可做急停演练。"
+                               Style="{StaticResource Caption}" Margin="2,4,0,0" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <ui:StatusLamp IsOn="{Binding StatusOnline}" IsFault="{Binding StatusFault}"
+                                   Width="18" Height="18" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding StatusText}" Margin="8,0,14,0" Foreground="{StaticResource MutedBrush}" />
+                    <Button Content="启动模拟 PLC" Command="{Binding StartSimulatorCommand}" Style="{StaticResource PrimaryButton}" />
+                    <Button Content="停止模拟（断线）" Command="{Binding StopSimulatorCommand}" />
+                    <Button Content="连接并采集" Command="{Binding ConnectCommand}" Style="{StaticResource PrimaryButton}" />
+                    <Button Content="断开" Command="{Binding DisconnectCommand}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <ItemsControl Grid.Row="1" ItemsSource="{Binding Tags}" Margin="12,6,12,0">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Columns="4" Rows="2" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Background="{StaticResource PanelBrush}" CornerRadius="6" Margin="5" Padding="12,10">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="22" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="22" />
+                            </Grid.RowDefinitions>
+                            <Grid Grid.Row="0">
+                                <TextBlock Text="{Binding Name}" FontSize="13" />
+                                <TextBlock Text="{Binding QualityText}" HorizontalAlignment="Right"
+                                           FontSize="11" Foreground="{Binding Quality, Converter={StaticResource QualityToBrush}}" />
+                            </Grid>
+                            <TextBlock Grid.Row="1" Text="{Binding ValueText}" FontFamily="{StaticResource NumberFont}"
+                                       FontSize="26" FontWeight="Bold" VerticalAlignment="Center" />
+                            <Grid Grid.Row="2">
+                                <TextBlock Text="{Binding Unit}" Style="{StaticResource Caption}" HorizontalAlignment="Left" />
+                                <ProgressBar Value="{Binding ProgressValue, Mode=OneWay}" Maximum="{Binding MaxValue, Mode=OneWay}"
+                                             VerticalAlignment="Center" Margin="0,0,26,0"
+                                             Visibility="{Binding IsBool, Converter={StaticResource InverseBoolToVisibility}}" />
+                                <ui:StatusLamp IsOn="{Binding IsOn}" HorizontalAlignment="Right" Width="16" Height="16"
+                                               Visibility="{Binding IsBool, Converter={StaticResource BoolToVisibility}}" />
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <Border Grid.Row="2" Background="{StaticResource PanelBrush}" Padding="16,4">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="目标" Style="{StaticResource Caption}" Margin="0,0,6,0" />
+                <TextBlock Text="{Binding TargetText}" Margin="0,0,24,0" />
+                <TextBlock Text="采集" Style="{StaticResource Caption}" Margin="0,0,6,0" />
+                <TextBlock Text="{Binding CyclesText}" Margin="0,0,24,0" />
+                <TextBlock Text="成功率" Style="{StaticResource Caption}" Margin="0,0,6,0" />
+                <TextBlock Text="{Binding SuccessText}" Margin="0,0,24,0" />
+                <TextBlock Text="延迟" Style="{StaticResource Caption}" Margin="0,0,6,0" />
+                <TextBlock Text="{Binding LatencyText}" Margin="0,0,24,0" />
+                <TextBlock Text="历史行数" Style="{StaticResource Caption}" Margin="0,0,6,0" />
+                <TextBlock Text="{Binding DbCountText}" Margin="0,0,24,0" />
+                <TextBlock Text="活动报警" Style="{StaticResource Caption}" Margin="0,0,6,0" />
+                <TextBlock Text="{Binding ActiveCountText}" />
+            </StackPanel>
+        </Border>
+
+        <TabControl Grid.Row="3" Margin="12,6,12,8">
+            <TabItem Header="实时">
+                <Grid Margin="6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="56*" />
+                        <ColumnDefinition Width="44*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Background="{StaticResource PanelBrush}" CornerRadius="6" Padding="10" Margin="0,0,8,0">
+                        <DockPanel>
+                            <TextBlock DockPanel.Dock="Top" Text="点位表" Foreground="{StaticResource AccentBrush}"
+                                       FontSize="12" Margin="2,0,0,6" />
+                            <DataGrid ItemsSource="{Binding Tags}">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="点位" Binding="{Binding Name}" Width="*" />
+                                    <DataGridTextColumn Header="地址" Binding="{Binding Address}" Width="80" />
+                                    <DataGridTextColumn Header="工程值" Binding="{Binding ValueText}" Width="*" />
+                                    <DataGridTextColumn Header="原始值" Binding="{Binding RawText}" Width="90" />
+                                    <DataGridTextColumn Header="质量" Binding="{Binding QualityText}" Width="70" />
+                                    <DataGridTextColumn Header="更新时间" Binding="{Binding UpdatedAt}" Width="105" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </DockPanel>
+                    </Border>
+
+                    <Grid Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="72*" />
+                            <RowDefinition Height="28*" />
+                        </Grid.RowDefinitions>
+                        <Border Grid.Row="0" Background="{StaticResource PanelBrush}" CornerRadius="6" Padding="10">
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Top" Text="实时趋势（液位 / 温度）"
+                                           Foreground="{StaticResource AccentBrush}" FontSize="12" Margin="2,0,0,6" />
+                                <ui:TrendChart x:Name="Trend" />
+                            </DockPanel>
+                        </Border>
+                        <Border Grid.Row="1" Background="{StaticResource PanelBrush}" CornerRadius="6" Margin="0,8,0,0" Padding="10">
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Top" Text="运行日志" Foreground="{StaticResource AccentBrush}"
+                                           FontSize="12" Margin="2,0,0,6" />
+                                <ListBox ItemsSource="{Binding Logs}" Background="Transparent" BorderThickness="0"
+                                         FontFamily="{StaticResource NumberFont}" FontSize="11" />
+                            </DockPanel>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="控制">
+                <Grid Margin="6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="43*" />
+                        <ColumnDefinition Width="57*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Grid.Column="0" Margin="0,0,8,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="230" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Border Grid.Row="0" Background="{StaticResource PanelBrush}" CornerRadius="6" Padding="12">
+                            <StackPanel>
+                                <TextBlock Text="手动 / 自动控制" Foreground="{StaticResource AccentBrush}" FontSize="14" />
+                                <TextBlock Text="{Binding AutoModeText}" Style="{StaticResource Caption}" Margin="0,4,0,8" />
+                                <WrapPanel>
+                                    <Button Content="启泵" Tag="pump,1,启动泵" Click="Command_Click" Margin="0,0,8,8" />
+                                    <Button Content="停泵" Tag="pump,0,停止泵" Click="Command_Click" Margin="0,0,8,8" />
+                                    <Button Content="加热开" Tag="heater,1,打开加热器" Click="Command_Click" Margin="0,0,8,8" />
+                                    <Button Content="加热关" Tag="heater,0,关闭加热器" Click="Command_Click" Margin="0,0,8,8" />
+                                    <Button Content="阀开" Tag="valve,1,打开出口阀" Click="Command_Click" Margin="0,0,8,8" />
+                                    <Button Content="阀关" Tag="valve,0,关闭出口阀" Click="Command_Click" Margin="0,0,8,8" />
+                                    <Button Content="自动开" Tag="autoMode,1,进入自动模式" Click="Command_Click" Margin="0,0,8,8" />
+                                    <Button Content="自动关" Tag="autoMode,0,退出手动模式" Click="Command_Click" Margin="0,0,8,8" />
+                                </WrapPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,4,0,8">
+                                    <TextBlock Text="温度设定" Style="{StaticResource Caption}" Margin="0,0,6,0" VerticalAlignment="Center" />
+                                    <TextBox x:Name="SetpointBox" Text="60" Width="80" Margin="0,0,8,0" />
+                                    <Button Content="写设定值" Click="Setpoint_Click" />
+                                    <Button Content="■ 急停" Click="EmergencyStop_Click" Background="#7A1E26"
+                                            BorderBrush="{StaticResource DangerBrush}" Margin="12,0,0,0" />
+                                </StackPanel>
+                                <TextBlock Text="{Binding ControlStatus}" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border Grid.Row="1" Background="{StaticResource PanelBrush}" CornerRadius="6" Padding="10" Margin="0,8,0,0">
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Top" Text="联锁矩阵（当前值是否允许操作）"
+                                           Foreground="{StaticResource AccentBrush}" FontSize="12" Margin="2,0,0,6" />
+                                <DataGrid ItemsSource="{Binding InterlockRows}">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="规则" Binding="{Binding Rule}" Width="130" />
+                                        <DataGridTextColumn Header="要求" Binding="{Binding Requirement}" Width="*" />
+                                        <DataGridTextColumn Header="状态" Binding="{Binding State}" Width="60" />
+                                        <DataGridTextColumn Header="原因" Binding="{Binding Reason}" Width="*" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </DockPanel>
+                        </Border>
+                    </Grid>
+
+                    <Border Grid.Column="1" Background="{StaticResource PanelBrush}" CornerRadius="6" Padding="10">
+                        <DockPanel>
+                            <TextBlock DockPanel.Dock="Top" Text="命令审计（写前联锁 → 写入 → 回读 → 结果）"
+                                       Foreground="{StaticResource AccentBrush}" FontSize="12" Margin="2,0,0,6" />
+                            <DataGrid ItemsSource="{Binding AuditRows}">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="时间" Binding="{Binding Time}" Width="100" />
+                                    <DataGridTextColumn Header="来源" Binding="{Binding Source}" Width="60" />
+                                    <DataGridTextColumn Header="点位" Binding="{Binding Tag}" Width="100" />
+                                    <DataGridTextColumn Header="请求" Binding="{Binding Requested}" Width="60" />
+                                    <DataGridTextColumn Header="回读" Binding="{Binding Actual}" Width="60" />
+                                    <DataGridTextColumn Header="结果" Binding="{Binding Result}" Width="50" />
+                                    <DataGridTextColumn Header="耗时" Binding="{Binding Duration}" Width="60" />
+                                    <DataGridTextColumn Header="说明" Binding="{Binding Message}" Width="*" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </DockPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="报警">
+                <Grid Margin="6">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="54" />
+                        <RowDefinition Height="44" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" Background="{Binding AlarmBannerBrush}" CornerRadius="4" Margin="4,0,4,6">
+                        <TextBlock Text="{Binding AlarmBannerText}" FontSize="14" Foreground="White"
+                                   VerticalAlignment="Center" Margin="14,0" />
+                    </Border>
+
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="4,0,0,6">
+                        <Button Content="确认选中报警" Click="AckSelected_Click" />
+                        <Button Content="确认全部" Click="AckAll_Click" />
+                        <Button Content="注入超温故障" Click="FaultTemp_Click" />
+                        <Button Content="注入超压故障" Click="FaultPressure_Click" />
+                        <Button Content="注入低液位" Click="FaultLevel_Click" />
+                    </StackPanel>
+
+                    <Grid Grid.Row="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="46*" />
+                            <RowDefinition Height="54*" />
+                        </Grid.RowDefinitions>
+                        <Border Grid.Row="0" Background="{StaticResource PanelBrush}" CornerRadius="6" Padding="10" Margin="4,0,4,6">
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Top" Text="活动报警（未确认 / 已确认）"
+                                           Foreground="{StaticResource AccentBrush}" FontSize="12" Margin="2,0,0,6" />
+                                <DataGrid x:Name="ActiveAlarmGrid" ItemsSource="{Binding ActiveAlarms}">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="时间" Binding="{Binding Time}" Width="130" />
+                                        <DataGridTextColumn Header="级别" Binding="{Binding Level}" Width="80" />
+                                        <DataGridTextColumn Header="点位" Binding="{Binding TagName}" Width="90" />
+                                        <DataGridTextColumn Header="消息" Binding="{Binding Message}" Width="*" />
+                                        <DataGridTextColumn Header="状态" Binding="{Binding State}" Width="80" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </DockPanel>
+                        </Border>
+                        <Border Grid.Row="1" Background="{StaticResource PanelBrush}" CornerRadius="6" Padding="10" Margin="4,6,4,0">
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Top" Text="报警历史（本次运行）"
+                                           Foreground="{StaticResource AccentBrush}" FontSize="12" Margin="2,0,0,6" />
+                                <DataGrid ItemsSource="{Binding AlarmHistory}">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="时间" Binding="{Binding Time}" Width="130" />
+                                        <DataGridTextColumn Header="级别" Binding="{Binding Level}" Width="80" />
+                                        <DataGridTextColumn Header="点位" Binding="{Binding TagName}" Width="90" />
+                                        <DataGridTextColumn Header="消息" Binding="{Binding Message}" Width="*" />
+                                        <DataGridTextColumn Header="状态" Binding="{Binding State}" Width="80" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </DockPanel>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="历史">
+                <Grid Margin="6">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="44" />
+                        <RowDefinition Height="28" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="4,4,0,0">
+                        <TextBlock Text="点位" Style="{StaticResource Caption}" Margin="0,0,6,0" VerticalAlignment="Center" />
+                        <ComboBox x:Name="HistoryTagCombo" Width="160" ItemsSource="{Binding Tags}"
+                                  DisplayMemberPath="Name" SelectedIndex="1" Margin="0,0,16,0" />
+                        <TextBlock Text="时间范围" Style="{StaticResource Caption}" Margin="0,0,6,0" VerticalAlignment="Center" />
+                        <ComboBox x:Name="HistoryRangeCombo" Width="120" SelectedIndex="1" Margin="0,0,16,0">
+                            <ComboBoxItem Content="最近 1 分钟" />
+                            <ComboBoxItem Content="最近 5 分钟" />
+                            <ComboBoxItem Content="最近 30 分钟" />
+                        </ComboBox>
+                        <Button Content="查询历史" Click="QueryHistory_Click" Style="{StaticResource PrimaryButton}" />
+                        <Button Content="导出 CSV" Click="ExportCsv_Click" />
+                        <Button Content="清理 7 天前" Click="Prune_Click" />
+                    </StackPanel>
+
+                    <TextBlock Grid.Row="1" Text="{Binding HistorySummary}" Style="{StaticResource Caption}"
+                               Margin="6,4,0,0" />
+                    <Border Grid.Row="2" Background="{StaticResource PanelBrush}" CornerRadius="6" Padding="10" Margin="4,4,4,0">
+                        <DataGrid ItemsSource="{Binding HistoryRows}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="时间" Binding="{Binding Time}" Width="170" />
+                                <DataGridTextColumn Header="点位" Binding="{Binding TagId}" Width="120" />
+                                <DataGridTextColumn Header="工程值" Binding="{Binding Value}" Width="*" />
+                                <DataGridTextColumn Header="质量" Binding="{Binding Quality}" Width="100" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Border>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>
+

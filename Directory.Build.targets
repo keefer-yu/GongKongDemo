@@ -1,0 +1,11 @@
+<Project>
+  <!-- V2 及之后的 Demo 需要设备/北向配置；V1 只使用代码内置配置。 -->
+  <ItemGroup Condition="$(MSBuildProjectName.Contains('.V2.')) Or $(MSBuildProjectName.Contains('.V3.')) Or $(MSBuildProjectName.Contains('.V4.')) Or $(MSBuildProjectName.Contains('.V5.'))">
+    <Content Include="$(MSBuildThisFileDirectory)config\devices.json"
+             Link="config\devices.json"
+             CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="$(MSBuildThisFileDirectory)config\northbound.json"
+             Link="config\northbound.json"
+             CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>
